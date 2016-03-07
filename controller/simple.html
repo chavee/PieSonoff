@@ -1,0 +1,141 @@
+<script src="http://netpie.io/microgear.js"></script>
+
+<script>
+
+	var a = location.hash.substring(1).split(':');
+    if (a.length==3) {
+        appid = a[0];
+        appkey = a[1];
+        appsecret = a[2];
+    }
+    else {
+        alert("Please parse appid, appkey and appsecret as a hash e.g. :\n\n"+location+"#APPID:APPKEY:APPSECRET");            
+    }
+    
+	var microgear = Microgear.create({
+		key: appkey,
+		secret: appsecret,
+		alias : "piesonoffhtml"
+	});
+	var status = 0;
+
+
+	microgear.on('message',function(topic,msg) {
+		if (msg.length > 1)
+			document.getElementById("data").innerHTML += msg+"<br>";
+
+		if (msg == '1')
+			document.body.style.backgroundColor = "#DDFFDD";
+		else
+			document.body.style.backgroundColor = "white";
+
+	});
+
+	microgear.on('connected', function() {
+		microgear.subscribe('/piesonoff/state');
+		microgear.chat('piesonoff','?');
+		document.getElementById("data").innerHTML = "<FONT color=#00BB00>ONLINE</FONT>";
+	});
+
+	microgear.on('disconnected', function() {
+		alert('microgear is disconnected....');
+	});
+
+	microgear.resettoken(function(err) {
+		microgear.connect(appid);
+	});
+
+function toggle() {
+	if (status == 0) {
+		status = 1;
+		microgear.chat('piesonoff','1');
+	}
+	else {
+		status = 0;
+		microgear.chat('piesonoff','0');
+	}
+}
+
+
+</script>
+
+ <style>
+.hot-container p { margin-top: 10px; }
+a { text-decoration: none; margin: 0 10px; }
+
+.hot-container {
+	min-height: 100px;
+	margin-top: 100px;
+	width: 100%;
+	text-align: center;
+}
+
+a.btn {
+	display: inline-block;
+	color: #666;
+	background-color: #eee;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	font-size: 100px;
+	padding: 10px 30px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border: 1px solid rgba(0,0,0,0.3);
+	border-bottom-width: 3px;
+}
+
+	a.btn:hover {
+		background-color: #e3e3e3;
+		border-color: rgba(0,0,0,0.5);
+	}
+	
+	a.btn:active {
+		background-color: #CCC;
+		border-color: rgba(0,0,0,0.9);
+	}
+
+/* blue button */
+
+a.btn.btn-blue {
+	background-color: #699DB6;
+	border-color: rgba(0,0,0,0.3);
+	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+	color: #FFF;
+}
+
+	a.btn.btn-blue:hover {
+		background-color: #4F87A2;
+		border-color: rgba(0,0,0,0.5);
+	}
+	
+	a.btn.btn-blue:active {
+		background-color: #3C677B;
+		border-color: rgba(0,0,0,0.9);
+	}
+
+/* red button */
+
+a.btn.btn-red {
+	background-color: #E48681;
+	border-color: rgba(0,0,0,0.3);
+	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+	color: #FFF;
+}
+
+	a.btn.btn-red:hover {
+		background-color: #DA4F49;
+		border-color: rgba(0,0,0,0.5);
+	}
+	
+	a.btn.btn-red:active {
+		background-color: #B32C24;
+		border-color: rgba(0,0,0,0.9);
+	}
+
+</style>
+
+<div id="data" align=right><FONT COLOR=#DDDDDD>OFFLINE</FONT></div>
+<br><br><br>
+<center><a href="#" class="btn btn-blue" onclick="toggle()">POWER</a></center>
+
