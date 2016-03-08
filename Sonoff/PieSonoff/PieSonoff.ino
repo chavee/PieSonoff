@@ -77,8 +77,9 @@ void setup() {
     Serial.println("Starting...");
 
     pinMode(RELAYPIN, OUTPUT);
-    pinMode(LEDPIN, OUTPUT);
-
+    #ifdef LEDPIN
+      pinMode(LEDPIN, OUTPUT);
+    #endif
     EEPROM.begin(512);
     state = EEPROM.read(EEPROM_STATE_ADDRESS)==1?1:0;
     updateIO();
