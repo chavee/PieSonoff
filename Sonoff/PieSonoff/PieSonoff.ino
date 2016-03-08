@@ -14,9 +14,10 @@
 #define LEDPIN 13
 #define EEPROM_STATE_ADDRESS 128
 
-#define APPID   "deerdev"
-#define KEY     "JMi3V8gkiq80s1N"
-#define SECRET  "czWPHQlMYDyW0Pml2wRlpz8uBfskF5"
+// Please visit netpie.io to get keys
+#define APPID   <APPID>       // e.g. "MySwitch"
+#define KEY     <APPKEY>      // e.g. "4DPanXKaSdb2VrT"
+#define SECRET  <APPSECRET>   // e.g. "ZgrXbHsaVp7TI8xW5oEcAqvY3"
 #define ALIAS   "piesonoff"
 
 WiFiClient client;
@@ -33,15 +34,20 @@ void sendState() {
     microgear.publish("/piesonoff/state","1");
 }
 
+
 void updateIO() {
   if (state == 1) {
     digitalWrite(RELAYPIN, HIGH);
-    digitalWrite(LEDPIN, LOW);
+    #ifdef LEDPIN
+      digitalWrite(LEDPIN, LOW);
+    #endif
   }
   else {
     state = 0;
     digitalWrite(RELAYPIN, LOW);
-    digitalWrite(LEDPIN, HIGH);
+    #ifdef LEDPIN
+      digitalWrite(LEDPIN, HIGH);
+    #endif
   }
 }
 
@@ -53,7 +59,7 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
   Serial.println((char *)msg);
   
   if (m == '0' || m == '1') {
-    state = m-'0';
+    state = m=='0'?0:1;
     EEPROM.write(EEPROM_STATE_ADDRESS, state);
     EEPROM.commit();
     updateIO();
