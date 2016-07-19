@@ -1,6 +1,10 @@
 <script src="http://netpie.io/microgear.js"></script>
 
 <script>
+    const ONMSG  = 'on';
+    const OFFMSG = 'off';
+    const CHKMSG = '?';
+
     var state = 0;
     var a = location.hash.substring(1).split(':');
     if (a.length==3) {
@@ -20,18 +24,18 @@
 
     microgear.on('message',function(topic,msg) {
         switch (msg) {
-            case '0' :  state = 0;
-                        document.body.style.backgroundColor = "#FFFFFF";
-                        break;
-            case '1' :  state = 1;
-                        document.body.style.backgroundColor = "#DDFFDD";
-                        break;
+            case OFFMSG :  state = 0;
+                           document.body.style.backgroundColor = "#FFFFFF";
+                           break;
+            case ONMSG  :  state = 1;
+                           document.body.style.backgroundColor = "#DDFFDD";
+                           break;
         }
     });
 
     microgear.on('connected', function() {
         microgear.subscribe('/piesonoff/state');
-        microgear.chat('piesonoff','?');
+        microgear.chat('piesonoff',CHKMSG);
         document.getElementById("data").innerHTML = "<FONT color=#00BB00>ONLINE</FONT>";
     });
 
@@ -39,11 +43,9 @@
 
     function toggle() {
         switch (state) {
-            case 0 :  state = 1;
-                      microgear.chat('piesonoff','1');
+            case 0 :  microgear.chat('piesonoff',ONMSG);
                       break;
-            case 1 :  state = 0;
-                      microgear.chat('piesonoff','0');
+            case 1 :  microgear.chat('piesonoff',OFFMSG);
                       break;
         }
     }

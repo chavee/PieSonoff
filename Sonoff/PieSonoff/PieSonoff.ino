@@ -1,11 +1,5 @@
-#include <AuthClient.h>
 #include <MicroGear.h>
-#include <MQTTClient.h>
-#include <SHA1.h>
-#include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <EEPROM.h>
-#include <MicroGear.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
@@ -14,14 +8,17 @@
 #define LEDPIN 13
 #define EEPROM_STATE_ADDRESS 128
 
+#define ONMSG  "on"
+#define OFFMSG "off"
+#define CHKMSG "?"
+#define ALIAS   "piesonoff"
+
 // Please visit netpie.io to get keys
 #define APPID   <APPID>       // e.g. "MySwitch"
 #define KEY     <APPKEY>      // e.g. "4DPanXKaSdb2VrT"
 #define SECRET  <APPSECRET>   // e.g. "ZgrXbHsaVp7TI8xW5oEcAqvY3"
-#define ALIAS   "piesonoff"
 
 WiFiClient client;
-AuthClient *authclient;
 
 char state = 0;
 
@@ -29,9 +26,9 @@ MicroGear microgear(client);
 
 void sendState() {
   if (state==0)
-    microgear.publish("/piesonoff/state","0");
+    microgear.publish("/piesonoff/state",OFFMSG);
   else
-    microgear.publish("/piesonoff/state","1");
+    microgear.publish("/piesonoff/state",ONMSG);
 }
 
 
@@ -52,19 +49,42 @@ void updateIO() {
 }
 
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
-  char m = *(char *)msg;
+  char *m = (char *)msg;
   
   Serial.print("Incoming message --> ");
   msg[msglen] = '\0';
   Serial.println((char *)msg);
+
+  if (strcmp(m,OFFMSG)==0) {
+    state = 0;    
+  }
+  else if (strcmp(m,ONMSG)==0) {
+    state = 1;
+  }
+  else if (strcmp(m,CHKMSG)==0) {
+    sendState();
+    return;
+  }
+  else {
+    return;
+  }
+
+  EEPROM.write(EEPROM_STATE_ADDRESS, state);
+  EEPROM.commit();
+  updateIO();
+  sendState();
   
-  if (m == '0' || m == '1') {
+  /*
+  if (strcmp(m,OFFMSG)==0 || strcmp(m,ONMSG)==0) {
+    if (st)
+    
     state = m=='0'?0:1;
     EEPROM.write(EEPROM_STATE_ADDRESS, state);
     EEPROM.commit();
     updateIO();
+  //if ( strcmp(m,OFFMSG)==0 || strcmp(m,ONMSG)==0 || strcmp(m,CHKMSG)==0 ) sendState();
   }
-  if (m == '0' || m == '1' || m == '?') sendState();
+  */
 }
 
 void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
