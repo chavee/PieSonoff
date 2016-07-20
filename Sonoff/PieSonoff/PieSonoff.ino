@@ -26,9 +26,9 @@ MicroGear microgear(client);
 
 void sendState() {
   if (state==0)
-    microgear.publish("/piesonoff/state",OFFMSG);
+    microgear.publish("/piesonoff/state",OFFMSG,true);
   else
-    microgear.publish("/piesonoff/state",ONMSG);
+    microgear.publish("/piesonoff/state",ONMSG,true);
 }
 
 
